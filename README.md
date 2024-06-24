@@ -54,4 +54,41 @@ Proyek ini bertujuan untuk meningkatkan efisiensi operasional dan pelayanan pela
 # Skema Basis Data
 ### Pembuatan Database dan Tabel
 
+`CREATE DATABASE TokoSepatuDB;
 
+USE TokoSepatuDB;
+
+CREATE TABLE Pelanggan (
+    PelangganID INT AUTO_INCREMENT PRIMARY KEY,
+    NamaDepan VARCHAR(50) NOT NULL,
+    NamaBelakang VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Telepon VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Produk (
+    ProdukID INT AUTO_INCREMENT PRIMARY KEY,
+    NamaProduk VARCHAR(100) NOT NULL,
+    Merek VARCHAR(50) NOT NULL,
+    Ukuran INT NOT NULL,
+    Harga DECIMAL(10, 2) NOT NULL,
+    Stok INT NOT NULL CHECK (Stok >= 0)
+);
+
+CREATE TABLE Pesanan (
+    PesananID INT AUTO_INCREMENT PRIMARY KEY,
+    PelangganID INT NOT NULL,
+    TanggalPesanan DATETIME NOT NULL,
+    TotalHarga DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT FK_PelangganID FOREIGN KEY (PelangganID) REFERENCES Pelanggan(PelangganID)
+);
+
+CREATE TABLE DetailPesanan (
+    DetailPesananID INT AUTO_INCREMENT PRIMARY KEY,
+    PesananID INT NOT NULL,
+    ProdukID INT NOT NULL,
+    Jumlah INT NOT NULL CHECK (Jumlah > 0),
+    HargaSatuan DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT FK_PesananID FOREIGN KEY (PesananID) REFERENCES Pesanan(PesananID),
+    CONSTRAINT FK_ProdukID FOREIGN KEY (ProdukID) REFERENCES Produk(ProdukID)
+);`
