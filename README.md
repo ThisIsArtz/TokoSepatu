@@ -54,3 +54,195 @@ Proyek ini bertujuan untuk meningkatkan efisiensi operasional dan pelayanan pela
 # Skema Basis Data
 ### Pembuatan Database dan Tabel
 
+```
+CREATE DATABASE TokoSepatuDB;
+
+USE TokoSepatuDB;
+
+CREATE TABLE Pelanggan (
+    PelangganID INT AUTO_INCREMENT PRIMARY KEY,
+    NamaDepan VARCHAR(50) NOT NULL,
+    NamaBelakang VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Telepon VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Produk (
+    ProdukID INT AUTO_INCREMENT PRIMARY KEY,
+    NamaProduk VARCHAR(100) NOT NULL,
+    Merek VARCHAR(50) NOT NULL,
+    Ukuran INT NOT NULL,
+    Harga DECIMAL(10, 2) NOT NULL,
+    Stok INT NOT NULL CHECK (Stok >= 0)
+);
+
+CREATE TABLE Pesanan (
+    PesananID INT AUTO_INCREMENT PRIMARY KEY,
+    PelangganID INT NOT NULL,
+    TanggalPesanan DATETIME NOT NULL,
+    TotalHarga DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT FK_PelangganID FOREIGN KEY (PelangganID) REFERENCES Pelanggan(PelangganID)
+);
+
+CREATE TABLE DetailPesanan (
+    DetailPesananID INT AUTO_INCREMENT PRIMARY KEY,
+    PesananID INT NOT NULL,
+    ProdukID INT NOT NULL,
+    Jumlah INT NOT NULL CHECK (Jumlah > 0),
+    HargaSatuan DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT FK_PesananID FOREIGN KEY (PesananID) REFERENCES Pesanan(PesananID),
+    CONSTRAINT FK_ProdukID FOREIGN KEY (ProdukID) REFERENCES Produk(ProdukID)
+);
+```
+
+
+*Penjelasan :*
+
+- CREATE DATABASE: Membuat basis data baru dengan nama TokoSepatuDB.
+
+- USE TokoSepatuDB: Menggunakan basis data TokoSepatuDB untuk operasi selanjutnya.
+
+- CREATE TABLE: Membuat tabel-tabel utama yang terdiri dari Pelanggan, Produk, Pesanan, dan DetailPesanan dengan struktur yang sudah ditentukan.
+
+
+  ### View
+```
+CREATE VIEW RingkasanPesanan AS
+SELECT p.PesananID, p.TanggalPesanan, pl.NamaDepan, pl.NamaBelakang, pl.Email, pr.NamaProduk, dp.Jumlah, dp.HargaSatuan, (dp.Jumlah * dp.HargaSatuan) AS TotalHarga
+FROM Pesanan p
+INNER JOIN Pelanggan pl ON p.PelangganID = pl.PelangganID
+INNER JOIN DetailPesanan dp ON p.PesananID = dp.PesananID
+INNER JOIN Produk pr ON dp.ProdukID = pr.ProdukID;
+```
+
+
+*Penjelasan :*
+
+- CREATE VIEW: Membuat view bernama RingkasanPesanan yang menyediakan ringkasan pesanan dengan informasi seperti ID pesanan, tanggal pesanan, nama pelanggan, email, nama produk, jumlah barang, harga satuan, dan total harga.
+
+
+### Insert Data
+```
+-- Insert data pelanggan
+INSERT INTO Pelanggan (NamaDepan, NamaBelakang, Email, Telepon)
+VALUES ('John', 'Doe', 'john.doe@example.com', '08123456789');
+
+INSERT INTO Pelanggan (NamaDepan, NamaBelakang, Email, Telepon)
+VALUES ('Jane', 'Smith', 'jane.smith@example.com', '08567890123');
+
+-- Insert data produk
+INSERT INTO Produk (NamaProduk, Merek, Ukuran, Harga, Stok)
+VALUES ('Sepatu Lari Nike Air Zoom', 'Nike', 42, 1200000.00, 50);
+
+INSERT INTO Produk (NamaProduk, Merek, Ukuran, Harga, Stok)
+VALUES ('Sepatu Sneakers Adidas Superstar', 'Adidas', 40, 900000.00, 30);
+
+-- Insert data pesanan
+INSERT INTO Pesanan (PelangganID, TanggalPesanan, TotalHarga)
+VALUES (1, NOW(), 2400000.00); -- Assuming PelangganID 1 is John Doe
+
+INSERT INTO Pesanan (PelangganID, TanggalPesanan, TotalHarga)
+VALUES (2, NOW(), 1800000.00); -- Assuming PelangganID 2 is Jane Smith
+
+-- Insert data detail pesanan
+INSERT INTO DetailPesanan (PesananID, ProdukID, Jumlah, HargaSatuan)
+VALUES (1, 1, 2, 1200000.00); -- PesananID 1 (John Doe) membeli 2 Sepatu Lari Nike Air Zoom
+
+INSERT INTO DetailPesanan (PesananID, ProdukID, Jumlah, HargaSatuan)
+VALUES (1, 2, 4, 900000.00); -- PesananID 1 (John Doe) membeli 4 Sepatu Sneakers Adidas Superstar
+
+INSERT INTO DetailPesanan (PesananID, ProdukID, Jumlah, HargaSatuan)
+VALUES (2, 2, 2, 900000.00); -- PesananID 2 (Jane Smith) membeli 2 Sepatu Sneakers Adidas Superstar
+```
+
+*Penjelasan :*
+
+- INSERT INTO: Memasukkan data ke dalam tabel Pelanggan, Produk, Pesanan, dan DetailPesanan dengan data yang telah disediakan untuk tujuan contoh.
+
+### Operasi Agregat
+```
+-- Operasi Agregat
+SELECT ProdukID, SUM(Jumlah) AS TotalTerjual, SUM(Jumlah * HargaSatuan) AS TotalPendapatan
+FROM DetailPesanan
+GROUP BY ProdukID;
+```
+
+*Penjelasan :*
+- SELECT: Melakukan operasi agregat untuk menghitung total barang terjual dan total pendapatan dari setiap produk berdasarkan data yang ada di tabel DetailPesanan.
+
+### Indeks
+```
+-- Indeks
+CREATE INDEX idx_nama_produk ON Produk(NamaProduk);
+CREATE INDEX idx_tanggal_pesanan ON Pesanan(TanggalPesanan);
+```
+
+*Penjelasan :*
+
+- CREATE INDEX: Membuat indeks pada kolom NamaProduk di tabel Produk dan pada kolom TanggalPesanan di tabel Pesanan. Indeks membantu mempercepat operasi pencarian dan query terkait kolom-kolom yang diindeks.
+
+### Left Join
+```
+-- Left Join
+SELECT pl.PelangganID, pl.NamaDepan, pl.NamaBelakang, p.PesananID, p.TanggalPesanan
+FROM Pelanggan pl
+LEFT JOIN Pesanan p ON pl.PelangganID = p.PelangganID;
+```
+
+*Penjelasan :*
+
+- LEFT JOIN: Menggunakan operasi LEFT JOIN untuk mengambil data pelanggan beserta pesanan yang mereka miliki. Dalam contoh ini, query mengambil semua data dari tabel Pelanggan dan data yang cocok dari tabel Pesanan.
+
+
+### Inner Join
+```
+-- Inner Join
+SELECT p.PesananID, p.TanggalPesanan, pr.NamaProduk, dp.Jumlah, dp.HargaSatuan
+FROM Pesanan p
+INNER JOIN DetailPesanan dp ON p.PesananID = dp.PesananID
+INNER JOIN Produk pr ON dp.ProdukID = pr.ProdukID;
+```
+
+*Penjelasan :*
+
+- INNER JOIN: Menggunakan operasi INNER JOIN untuk mengambil data pesanan, detail pesanan, dan produk yang terkait. INNER JOIN menghasilkan hasil yang hanya mempertahankan baris yang memiliki nilai kunci yang cocok di kedua tabel yang berpartisipasi dalam join.
+
+
+### Subquery
+```
+-- Subquery
+SELECT ProdukID, NamaProduk
+FROM Produk
+WHERE ProdukID NOT IN (SELECT DISTINCT ProdukID FROM DetailPesanan);
+```
+
+*Penjelasan :*
+
+- Subquery: Subquery digunakan di dalam klausa WHERE untuk mengambil produk yang tidak terdapat dalam tabel DetailPesanan. Subquery SELECT DISTINCT ProdukID FROM DetailPesanan digunakan untuk mendapatkan daftar ProdukID yang terkait dengan setidaknya satu detail pesanan.
+
+
+### Having
+```
+-- Having
+SELECT ProdukID, SUM(Jumlah) AS TotalTerjual
+FROM DetailPesanan
+GROUP BY ProdukID
+HAVING SUM(Jumlah) > 100;
+```
+
+*Penjelasan :*
+
+- HAVING: Digunakan setelah klausa GROUP BY untuk memfilter hasil grup berdasarkan kondisi tertentu. Dalam contoh ini, query mengambil produk yang memiliki jumlah penjualan lebih dari 100.
+
+
+### Wildcard
+```
+-- Wildcard
+SELECT ProdukID, NamaProduk
+FROM Produk
+WHERE NamaProduk LIKE '%Sport%';
+```
+
+*Penjelasan :*
+
+- Wildcard (%): Digunakan dalam klausa WHERE untuk mencari produk dengan nama yang mengandung kata 'Sport'. % adalah karakter wildcard yang mencocokkan nol atau lebih karakter apa pun.
