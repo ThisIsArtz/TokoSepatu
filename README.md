@@ -104,6 +104,51 @@ CREATE TABLE DetailPesanan (
 
 - CREATE TABLE: Membuat tabel-tabel utama yang terdiri dari Pelanggan, Produk, Pesanan, dan DetailPesanan dengan struktur yang sudah ditentukan.
 
+  ### Triggers
+  ```
+  DELIMITER $$
+
+USE `tokosepatudb`$$
+
+DROP TRIGGER /*!50032 IF EXISTS */ `UpdateStok`$$
+
+CREATE
+    /*!50017 DEFINER = 'root'@'localhost' */
+    TRIGGER `UpdateStok` AFTER INSERT ON `detailpesanan` 
+    FOR EACH ROW 
+BEGIN
+    -- Deklarasi variabel untuk menyimpan stok produk yang akan diupdate
+    DECLARE stok_produk INT;
+    
+    -- Ambil stok produk sebelum diupdate
+    SELECT Stok INTO stok_produk
+    FROM Produk
+    WHERE ProdukID = NEW.ProdukID;
+    
+    -- Update stok produk
+    UPDATE Produk
+    SET Stok = stok_produk - NEW.Jumlah
+    WHERE ProdukID = NEW.ProdukID;
+END;
+$$
+
+DELIMITER ;
+```
+
+*Penjelasan :*
+
+#### Trigger Type: 
+
+- AFTER INSERT : Trigger ini dijalankan setelah operasi insert dilakukan pada tabel detailpesanan.
+
+- FOR EACH ROW: Trigger ini dieksekusi sekali untuk setiap baris yang dimasukkan ke dalam tabel detailpesanan.
+
+- DECLARE: Menggunakan DECLARE untuk mendefinisikan variabel lokal di dalam trigger.
+
+- SELECT INTO: Menggunakan SELECT INTO untuk mengambil nilai dari kolom Stok dari tabel Produk dan menyimpannya ke dalam variabel stok_produk.
+
+- UPDATE: Menggunakan pernyataan UPDATE untuk mengurangi stok produk dengan jumlah yang dipesan dan mengupdate tabel Produk.
+
 
   ### View
 ```
