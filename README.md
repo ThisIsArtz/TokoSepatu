@@ -103,10 +103,12 @@ CREATE TABLE DetailPesanan (
 - USE TokoSepatuDB: Menggunakan basis data TokoSepatuDB untuk operasi selanjutnya.
 
 - CREATE TABLE: Membuat tabel-tabel utama yang terdiri dari Pelanggan, Produk, Pesanan, dan DetailPesanan dengan struktur yang sudah ditentukan.
+  
 
   ### Triggers
-  ```
-  DELIMITER $$
+  
+```
+DELIMITER $$
 
 USE `tokosepatudb`$$
 
@@ -135,6 +137,7 @@ $$
 DELIMITER ;
 ```
 
+
 *Penjelasan :*
 
 #### Trigger Type: 
@@ -148,6 +151,7 @@ DELIMITER ;
 - SELECT INTO: Menggunakan SELECT INTO untuk mengambil nilai dari kolom Stok dari tabel Produk dan menyimpannya ke dalam variabel stok_produk.
 
 - UPDATE: Menggunakan pernyataan UPDATE untuk mengurangi stok produk dengan jumlah yang dipesan dan mengupdate tabel Produk.
+
 
 
   ### View
